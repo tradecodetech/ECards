@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard - CardCrafter</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">✨ CardCrafter</div>
+    <nav>
+      <ul>
+        <li><a href="#">Create New</a></li>
+        <li><a href="#">My Cards</a></li>
+        <li><a href="#">AI Messages</a></li>
+        <li><a href="#">Account</a></li>
+        <li><a href="login.html">Logout</a></li>
+		<li><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Dashboard Content -->
+  <main class="dashboard-container">
+    <h1>Welcome, [User] 👋</h1>
+    <p>What would you like to do today?</p>
+
+    <div class="dashboard-grid">
+      <div class="card">
+        <h3>➕ Create New Card</h3>
+        <p>Start from a blank or use a template.</p>
+        <a href="#" class="btn primary">Start Building</a>
+      </div>
+      <div class="card">
+        <h3>📁 My Cards</h3>
+        <p>View and edit your saved creations.</p>
+        <a href="#" class="btn secondary">View Cards</a>
+      </div>
+      <div class="card">
+        <h3>🧠 AI Message Generator</h3>
+        <p>Let our AI write a message for you.</p>
+        <a href="#" class="btn secondary">Try AI</a>
+      </div>
+    </div>
+  </main>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+<script>
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyALyW1GlOIA4_8OydD0lxt-f1qo_R3RUKs",
+    authDomain: "cardcrafter-180f9.firebaseapp.com",
+    projectId: "cardcrafter-180f9",
+    appId: "1:689404564716:web:42c1dfc14fda177321c1c9"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+</script>
+
+<script>
+  document.getElementById('logout-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    firebase.auth().signOut().then(() => {
+      alert("Logged out successfully.");
+      window.location.href = "login.html";
+    }).catch((error) => {
+      alert("Logout failed: " + error.message);
+    });
+  });
+</script>
+
+#Protect dashboard.html 
+<script>
+  auth.onAuthStateChanged((user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+</script>
+
+</body>
+</html>

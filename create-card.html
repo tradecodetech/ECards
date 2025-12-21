@@ -1,0 +1,87 @@
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyALyW1GlOIA4_8OydD0lxt-f1qo_R3RUKs",
+    authDomain: "cardcrafter-180f9.firebaseapp.com",
+    projectId: "cardcrafter-180f9",
+    appId: "1:689404564716:web:42c1dfc14fda177321c1c9"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ✅ Wait until DOM is fully loaded
+ document.addEventListener('DOMContentLoaded', () => {
+
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    auth.signOut().then(() => {
+      window.location.href = "login.html";
+    });
+  });
+
+  // Live preview
+  const messageInput = document.getElementById('message');
+  const previewOutput = document.getElementById('preview-output');
+  messageInput.addEventListener('input', () => {
+    previewOutput.textContent = messageInput.value;
+  });
+
+  // ✨ AI Message Generator
+  const randomMessages = [
+    "Wishing you a day filled with light and love.",
+    "Your presence makes the world a better place.",
+    "Just wanted to remind you how amazing you are.",
+    "You are deeply appreciated, always.",
+    "May this card carry a hug to your heart.",
+    "Sending good vibes and warm thoughts your way.",
+    "You’ve got this — one step at a time.",
+    "Your smile is powerful. Don’t forget to use it.",
+    "Even small gestures make big waves. Keep shining.",
+    "Gratitude, love, and light — all wrapped in one card."
+  ];
+
+  document.getElementById('ai-generate').addEventListener('click', () => {
+    const randomIndex = Math.floor(Math.random() * randomMessages.length);
+    const generated = randomMessages[randomIndex];
+    document.getElementById('message').value = generated;
+    previewOutput.textContent = generated;
+  });
+
+  // Save to Firestore
+  document.getElementById('card-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const format = document.getElementById('format').value;
+    const occasion = document.getElementById('occasion').value;
+    const message = document.getElementById('message').value;
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("You must be logged in to save a card.");
+      return;
+    }
+
+    db.collection("cards").add({
+      userId: user.uid,
+      format: format,
+      occasion: occasion,
+      message: message,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      alert("✅ Card saved successfully!");
+      document.getElementById('card-form').reset();
+      previewOutput.textContent = "[ Your card message will appear here ]";
+    })
+    .catch((error) => {
+      alert("❌ Error saving card: " + error.message);
+    });
+  });
+
+});
+
+</script>

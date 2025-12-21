@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Cards - CardCrafter</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">✨ CardCrafter</div>
+    <nav>
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="create-card.html">Create New</a></li>
+        <li><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+    <h1>📁 My Saved Cards</h1>
+    <div id="cards-list">
+      <p>Loading your cards...</p>
+    </div>
+  </main>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyALyW1GlOIA4_8OydD0lxt-f1qo_R3RUKs",
+      authDomain: "cardcrafter-180f9.firebaseapp.com",
+      projectId: "cardcrafter-180f9",
+      appId: "1:689404564716:web:42c1dfc14fda177321c1c9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        auth.signOut().then(() => {
+          window.location.href = "login.html";
+        });
+      });
+
+      // Load cards
+      auth.onAuthStateChanged((user) => {
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        const cardsList = document.getElementById('cards-list');
+        cardsList.innerHTML = "<p>Loading your cards...</p>";
+
+        db.collection("cards")
+          .where("userId", "==", user.uid)
+          .orderBy("createdAt", "desc")
+          .get()
+          .then((snapshot) => {
+            if (snapshot.empty) {
+              cardsList.innerHTML = "<p>You haven't saved any cards yet.</p>";
+              return;
+            }
+
+            let html = "";
+            snapshot.forEach((doc) => {
+              const card = doc.data();
+              const date = card.createdAt?.toDate().toLocaleString() || "Unknown time";
+              html += `
+                <div class="card saved-card">
+                  <p><strong>📝 Format:</strong> ${card.format}</p>
+                  <p><strong>🎉 Occasion:</strong> ${card.occasion}</p>
+                  <p><strong>💌 Message:</strong> ${card.message}</p>
+                  <p class="timestamp">🕒 Saved: ${date}</p>
+                </div>
+              `;
+            });
+
+            cardsList.innerHTML = html;
+          })
+          .catch((error) => {
+            cardsList.innerHTML = `<p>Error loading cards: ${error.message}</p>`;
+          });
+      });
+    });
+  </script>
+
+  <style>
+    /* Optional quick styles if not in your CSS yet */
+    .saved-card {
+      background: white;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+      text-align: left;
+    }
+
+    .saved-card .timestamp {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 1rem;
+    }
+  </style>
+
+</body>
+</html>
