@@ -1,135 +1,184 @@
-<script>
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyALyW1GlOIA4_8OydD0lxt-f1qo_R3RUKs",
-    authDomain: "cardcrafter-180f9.firebaseapp.com",
-    projectId: "cardcrafter-180f9",
-    storageBucket: "cardcrafter-180f9.appspot.com",
-    appId: "1:689404564716:web:42c1dfc14fda177321c1c9"
-  };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Card | CardCrafter</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"></script>
+  <!-- Fallback if you're using older Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
+</head>
+<body>
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
+  <header class="navbar">
+    <div class="logo">✨ CardCrafter</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="login.html">Login</a></li>
+        <li><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
 
-  document.addEventListener('DOMContentLoaded', () => {
+  <main class="builder">
+    <h2>🎨 Build Your E-Greeting Card</h2>
+    <form id="card-form">
+      <label>Occasion:
+        <select id="occasion" required>
+          <option value="">-- Select Occasion --</option>
+          <option>Congratulations</option>
+          <option>Birthday</option>
+          <option>Sympathy</option>
+          <option>Condolences</option>
+          <option>In Memory</option>
+        </select>
+      </label>
 
-    /* ======================
-       LOGOUT
-    ====================== */
-    document.getElementById('logout-btn').addEventListener('click', function(e) {
-      e.preventDefault();
-      auth.signOut().then(() => {
-        window.location.href = "login.html";
+      <label>Format:
+        <select id="format" required>
+          <option value="image">Image</option>
+          <option value="gif">GIF</option>
+        </select>
+      </label>
+
+      <label>Message:
+        <textarea id="message" placeholder="Type your custom message..."></textarea>
+      </label>
+
+      <div class="buttons">
+        <button type="button" id="ai-generate">✨ Generate AI Message</button>
+        <button type="button" id="ai-tribute">🕊️ Generate Tribute</button>
+      </div>
+
+      <label>Upload Photo:
+        <input type="file" id="photo" accept="image/*" />
+      </label>
+
+      <button type="submit">💾 Save Card</button>
+    </form>
+
+    <div class="preview">
+      <h3>Live Preview:</h3>
+      <p id="preview-output">[ Your card message will appear here ]</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 CardCrafter</p>
+  </footer>
+
+  <!-- Your Script Goes Below -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyALyW1GlOIA4_8OydD0lxt-f1qo_R3RUKs",
+      authDomain: "cardcrafter-180f9.firebaseapp.com",
+      projectId: "cardcrafter-180f9",
+      storageBucket: "cardcrafter-180f9.appspot.com",
+      appId: "1:689404564716:web:42c1dfc14fda177321c1c9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const messageInput = document.getElementById('message');
+      const previewOutput = document.getElementById('preview-output');
+
+      const randomMessages = [
+        "Wishing you a day filled with light and love.",
+        "Your presence makes the world a better place.",
+        "Just wanted to remind you how amazing you are.",
+        "You are deeply appreciated, always.",
+        "May this card carry a hug to your heart.",
+        "Sending good vibes and warm thoughts your way.",
+        "You’ve got this — one step at a time.",
+        "Your smile is powerful. Don’t forget to use it.",
+        "Even small gestures make big waves. Keep shining.",
+        "Gratitude, love, and light — all wrapped in one card."
+      ];
+
+      const tributeMessages = [
+        "In loving memory — gone from our sight, but never from our hearts.",
+        "Your light lives on in every life you touched.",
+        "Forever remembered, forever loved.",
+        "May peace surround you and comfort those who carry your memory.",
+        "A beautiful soul, now resting in eternal peace.",
+        "Your legacy of love will never fade.",
+        "Gone but never forgotten — your spirit lives on."
+      ];
+
+      document.getElementById('ai-generate')?.addEventListener('click', () => {
+        const generated = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+        messageInput.value = generated;
+        previewOutput.textContent = generated;
       });
-    });
 
-    /* ======================
-       LIVE PREVIEW
-    ====================== */
-    const messageInput = document.getElementById('message');
-    const previewOutput = document.getElementById('preview-output');
+      document.getElementById('ai-tribute')?.addEventListener('click', () => {
+        const generated = tributeMessages[Math.floor(Math.random() * tributeMessages.length)];
+        messageInput.value = generated;
+        previewOutput.textContent = generated;
+      });
 
-    messageInput.addEventListener('input', () => {
-      previewOutput.textContent = messageInput.value;
-    });
+      messageInput?.addEventListener('input', () => {
+        previewOutput.textContent = messageInput.value;
+      });
 
-    /* ======================
-       AI MESSAGE SETS
-    ====================== */
+      document.getElementById('logout-btn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        auth.signOut().then(() => {
+          window.location.href = "login.html";
+        });
+      });
 
-    const randomMessages = [
-      "Wishing you a day filled with light and love.",
-      "Your presence makes the world a better place.",
-      "Just wanted to remind you how amazing you are.",
-      "You are deeply appreciated, always.",
-      "May this card carry a hug to your heart.",
-      "Sending good vibes and warm thoughts your way.",
-      "You’ve got this — one step at a time.",
-      "Your smile is powerful. Don’t forget to use it.",
-      "Even small gestures make big waves. Keep shining.",
-      "Gratitude, love, and light — all wrapped in one card."
-    ];
+      document.getElementById('card-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-    const tributeMessages = [
-      "In loving memory — gone from our sight, but never from our hearts.",
-      "Your light lives on in every life you touched.",
-      "Forever remembered, forever loved.",
-      "May peace surround you and comfort those who carry your memory.",
-      "A beautiful soul, now resting in eternal peace.",
-      "Your legacy of love will never fade.",
-      "Gone but never forgotten — your spirit lives on."
-    ];
+        const format = document.getElementById('format').value;
+        const occasion = document.getElementById('occasion').value;
+        const message = messageInput.value;
+        const photoFile = document.getElementById('photo')?.files[0];
+        const user = auth.currentUser;
 
-    /* ======================
-       GENERAL AI BUTTON
-    ====================== */
-    document.getElementById('ai-generate')?.addEventListener('click', () => {
-      const generated = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-      messageInput.value = generated;
-      previewOutput.textContent = generated;
-    });
-
-    /* ======================
-       TRIBUTE AI BUTTON
-    ====================== */
-    document.getElementById('ai-tribute')?.addEventListener('click', () => {
-      const generated = tributeMessages[Math.floor(Math.random() * tributeMessages.length)];
-      messageInput.value = generated;
-      previewOutput.textContent = generated;
-    });
-
-    /* ======================
-       SAVE TO FIRESTORE + STORAGE
-    ====================== */
-    document.getElementById('card-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const format = document.getElementById('format').value;
-      const occasion = document.getElementById('occasion').value;
-      const message = messageInput.value;
-      const photoFile = document.getElementById('photo')?.files[0];
-      const user = auth.currentUser;
-
-      if (!user) {
-        alert("You must be logged in to save a card.");
-        return;
-      }
-
-      let photoURL = "";
-
-      try {
-        // Upload photo if provided
-        if (photoFile) {
-          const storageRef = storage.ref(
-            `memorialCards/${user.uid}/${Date.now()}_${photoFile.name}`
-          );
-          const snapshot = await storageRef.put(photoFile);
-          photoURL = await snapshot.ref.getDownloadURL();
+        if (!user) {
+          alert("You must be logged in to save a card.");
+          return;
         }
 
-        await db.collection("cards").add({
-          userId: user.uid,
-          format,
-          occasion,
-          message,
-          photoURL,
-          cardType: ["In Memory", "Tribute", "Condolences"].includes(occasion)
-            ? "Memorial"
-            : "Standard",
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        let photoURL = "";
 
-        alert("✅ Card saved successfully!");
-        document.getElementById('card-form').reset();
-        previewOutput.textContent = "[ Your card message will appear here ]";
+        try {
+          if (photoFile) {
+            const storageRef = storage.ref(`memorialCards/${user.uid}/${Date.now()}_${photoFile.name}`);
+            const snapshot = await storageRef.put(photoFile);
+            photoURL = await snapshot.ref.getDownloadURL();
+          }
 
-      } catch (error) {
-        alert("❌ Error saving card: " + error.message);
-      }
+          await db.collection("cards").add({
+            userId: user.uid,
+            format,
+            occasion,
+            message,
+            photoURL,
+            cardType: ["In Memory", "Tribute", "Condolences"].includes(occasion) ? "Memorial" : "Standard",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          alert("✅ Card saved successfully!");
+          document.getElementById('card-form').reset();
+          previewOutput.textContent = "[ Your card message will appear here ]";
+        } catch (error) {
+          alert("❌ Error saving card: " + error.message);
+        }
+      });
     });
-
-  });
-</script>
+  </script>
+</body>
+</html>
