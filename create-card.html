@@ -12,76 +12,118 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // ✅ Wait until DOM is fully loaded
- document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
 
-  // Logout
-  document.getElementById('logout-btn').addEventListener('click', function(e) {
-    e.preventDefault();
-    auth.signOut().then(() => {
-      window.location.href = "login.html";
+    /* ======================
+       LOGOUT
+    ====================== */
+    document.getElementById('logout-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
     });
-  });
 
-  // Live preview
-  const messageInput = document.getElementById('message');
-  const previewOutput = document.getElementById('preview-output');
-  messageInput.addEventListener('input', () => {
-    previewOutput.textContent = messageInput.value;
-  });
+    /* ======================
+       LIVE PREVIEW
+    ====================== */
+    const messageInput = document.getElementById('message');
+    const previewOutput = document.getElementById('preview-output');
 
-  // ✨ AI Message Generator
-  const randomMessages = [
-    "Wishing you a day filled with light and love.",
-    "Your presence makes the world a better place.",
-    "Just wanted to remind you how amazing you are.",
-    "You are deeply appreciated, always.",
-    "May this card carry a hug to your heart.",
-    "Sending good vibes and warm thoughts your way.",
-    "You’ve got this — one step at a time.",
-    "Your smile is powerful. Don’t forget to use it.",
-    "Even small gestures make big waves. Keep shining.",
-    "Gratitude, love, and light — all wrapped in one card."
-  ];
+    messageInput.addEventListener('input', () => {
+      previewOutput.textContent = messageInput.value;
+    });
 
-  document.getElementById('ai-generate').addEventListener('click', () => {
-    const randomIndex = Math.floor(Math.random() * randomMessages.length);
-    const generated = randomMessages[randomIndex];
-    document.getElementById('message').value = generated;
-    previewOutput.textContent = generated;
-  });
+    /* ======================
+       AI MESSAGE SETS
+    ====================== */
 
-  // Save to Firestore
-  document.getElementById('card-form').addEventListener('submit', function(e) {
-    e.preventDefault();
+    // General messages
+    const randomMessages = [
+      "Wishing you a day filled with light and love.",
+      "Your presence makes the world a better place.",
+      "Just wanted to remind you how amazing you are.",
+      "You are deeply appreciated, always.",
+      "May this card carry a hug to your heart.",
+      "Sending good vibes and warm thoughts your way.",
+      "You’ve got this — one step at a time.",
+      "Your smile is powerful. Don’t forget to use it.",
+      "Even small gestures make big waves. Keep shining.",
+      "Gratitude, love, and light — all wrapped in one card."
+    ];
 
-    const format = document.getElementById('format').value;
-    const occasion = document.getElementById('occasion').value;
-    const message = document.getElementById('message').value;
-    const user = auth.currentUser;
+    // Memorial / Tribute messages
+    const tributeMessages = [
+      "In loving memory — gone from our sight, but never from our hearts.",
+      "Your light lives on in every life you touched.",
+      "Forever remembered, forever loved.",
+      "May peace surround you and comfort those who carry your memory.",
+      "A beautiful soul, now resting in eternal peace.",
+      "Your legacy of love will never fade.",
+      "Gone but never forgotten — your spirit lives on."
+    ];
 
-    if (!user) {
-      alert("You must be logged in to save a card.");
-      return;
+    /* ======================
+       GENERAL AI BUTTON
+    ====================== */
+    const aiGenerateBtn = document.getElementById('ai-generate');
+    if (aiGenerateBtn) {
+      aiGenerateBtn.addEventListener('click', () => {
+        const randomIndex = Math.floor(Math.random() * randomMessages.length);
+        const generated = randomMessages[randomIndex];
+        messageInput.value = generated;
+        previewOutput.textContent = generated;
+      });
     }
 
-    db.collection("cards").add({
-      userId: user.uid,
-      format: format,
-      occasion: occasion,
-      message: message,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-      alert("✅ Card saved successfully!");
-      document.getElementById('card-form').reset();
-      previewOutput.textContent = "[ Your card message will appear here ]";
-    })
-    .catch((error) => {
-      alert("❌ Error saving card: " + error.message);
+    /* ======================
+       TRIBUTE AI BUTTON
+    ====================== */
+    const tributeBtn = document.getElementById('ai-tribute');
+    if (tributeBtn) {
+      tributeBtn.addEventListener('click', () => {
+        const randomIndex = Math.floor(Math.random() * tributeMessages.length);
+        const generated = tributeMessages[randomIndex];
+        messageInput.value = generated;
+        previewOutput.textContent = generated;
+      });
+    }
+
+    /* ======================
+       SAVE TO FIRESTORE
+    ====================== */
+    document.getElementById('card-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const format = document.getElementById('format').value;
+      const occasion = document.getElementById('occasion').value;
+      const message = messageInput.value;
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert("You must be logged in to save a card.");
+        return;
+      }
+
+      db.collection("cards").add({
+        userId: user.uid,
+        format: format,
+        occasion: occasion,
+        message: message,
+        cardType: ["In Memory", "Tribute", "Condolences"].includes(occasion)
+          ? "Memorial"
+          : "Standard",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        alert("✅ Card saved successfully!");
+        document.getElementById('card-form').reset();
+        previewOutput.textContent = "[ Your card message will appear here ]";
+      })
+      .catch((error) => {
+        alert("❌ Error saving card: " + error.message);
+      });
     });
+
   });
-
-});
-
 </script>
