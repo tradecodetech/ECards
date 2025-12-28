@@ -4,6 +4,7 @@
     apiKey: "AIzaSyALyW1GlOIA4_8OydD0lxt-f1qo_R3RUKs",
     authDomain: "cardcrafter-180f9.firebaseapp.com",
     projectId: "cardcrafter-180f9",
+    storageBucket: "cardcrafter-180f9.appspot.com",
     appId: "1:689404564716:web:42c1dfc14fda177321c1c9"
   };
 
@@ -11,6 +12,7 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
+  const storage = firebase.storage();
 
   document.addEventListener('DOMContentLoaded', () => {
 
@@ -38,7 +40,6 @@
        AI MESSAGE SETS
     ====================== */
 
-    // General messages
     const randomMessages = [
       "Wishing you a day filled with light and love.",
       "Your presence makes the world a better place.",
@@ -52,7 +53,6 @@
       "Gratitude, love, and light — all wrapped in one card."
     ];
 
-    // Memorial / Tribute messages
     const tributeMessages = [
       "In loving memory — gone from our sight, but never from our hearts.",
       "Your light lives on in every life you touched.",
@@ -66,38 +66,31 @@
     /* ======================
        GENERAL AI BUTTON
     ====================== */
-    const aiGenerateBtn = document.getElementById('ai-generate');
-    if (aiGenerateBtn) {
-      aiGenerateBtn.addEventListener('click', () => {
-        const randomIndex = Math.floor(Math.random() * randomMessages.length);
-        const generated = randomMessages[randomIndex];
-        messageInput.value = generated;
-        previewOutput.textContent = generated;
-      });
-    }
+    document.getElementById('ai-generate')?.addEventListener('click', () => {
+      const generated = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+      messageInput.value = generated;
+      previewOutput.textContent = generated;
+    });
 
     /* ======================
        TRIBUTE AI BUTTON
     ====================== */
-    const tributeBtn = document.getElementById('ai-tribute');
-    if (tributeBtn) {
-      tributeBtn.addEventListener('click', () => {
-        const randomIndex = Math.floor(Math.random() * tributeMessages.length);
-        const generated = tributeMessages[randomIndex];
-        messageInput.value = generated;
-        previewOutput.textContent = generated;
-      });
-    }
+    document.getElementById('ai-tribute')?.addEventListener('click', () => {
+      const generated = tributeMessages[Math.floor(Math.random() * tributeMessages.length)];
+      messageInput.value = generated;
+      previewOutput.textContent = generated;
+    });
 
     /* ======================
-       SAVE TO FIRESTORE
+       SAVE TO FIRESTORE + STORAGE
     ====================== */
-    document.getElementById('card-form').addEventListener('submit', function(e) {
+    document.getElementById('card-form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const format = document.getElementById('format').value;
       const occasion = document.getElementById('occasion').value;
       const message = messageInput.value;
+      const photoFile = document.getElementById('photo')?.files[0];
       const user = auth.currentUser;
 
       if (!user) {
@@ -105,24 +98,37 @@
         return;
       }
 
-      db.collection("cards").add({
-        userId: user.uid,
-        format: format,
-        occasion: occasion,
-        message: message,
-        cardType: ["In Memory", "Tribute", "Condolences"].includes(occasion)
-          ? "Memorial"
-          : "Standard",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      })
-      .then(() => {
+      let photoURL = "";
+
+      try {
+        // Upload photo if provided
+        if (photoFile) {
+          const storageRef = storage.ref(
+            `memorialCards/${user.uid}/${Date.now()}_${photoFile.name}`
+          );
+          const snapshot = await storageRef.put(photoFile);
+          photoURL = await snapshot.ref.getDownloadURL();
+        }
+
+        await db.collection("cards").add({
+          userId: user.uid,
+          format,
+          occasion,
+          message,
+          photoURL,
+          cardType: ["In Memory", "Tribute", "Condolences"].includes(occasion)
+            ? "Memorial"
+            : "Standard",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
         alert("✅ Card saved successfully!");
         document.getElementById('card-form').reset();
         previewOutput.textContent = "[ Your card message will appear here ]";
-      })
-      .catch((error) => {
+
+      } catch (error) {
         alert("❌ Error saving card: " + error.message);
-      });
+      }
     });
 
   });
