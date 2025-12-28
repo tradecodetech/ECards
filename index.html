@@ -27,24 +27,49 @@
     <h1>Create & Send Beautiful E-Greeting Cards</h1>
     <p>Design emotional messages, powered by AI — share love, hope, and creativity in just a few clicks.</p>
     <div class="hero-buttons">
-      <a href="#" class="btn primary">🎨 Try Free Demo</a>
+     <a href="create-card.html" class="btn primary">🎨 Try Free Demo</a>
       <a href="#" class="btn secondary">🚀 Subscribe – $4.99/mo</a>
     </div>
   </section>
 
-  <!-- Features -->
-  <section class="features">
-    <div class="feature-box">
-      <h3>🎨 Easy Design</h3>
-      <p>Use templates or start from scratch with drag-n-drop tools.</p>
-    </div>
-    <div class="feature-box">
-      <h3>🤖 Smart AI Messages</h3>
-      <p>Let AI write heartfelt, funny, or poetic text for your cards.</p>
-    </div>
-    <div class="feature-box">
-      <h3>✉️ Share Instantly</h3>
-      <p>Email your card or download it as a GIF or image.</p>
+  <!-- Card Builder -->
+  <section id="builder" class="card-builder">
+    <h2>📝 Build Your Card</h2>
+    <form id="card-form">
+      <label for="occasion">Occasion:</label>
+      <select id="occasion">
+        <option>Birthday</option>
+        <option>Congratulations</option>
+        <option>Thinking of You</option>
+        <option>In Memory</option>
+        <option>Condolences</option>
+        <option>Custom</option>
+      </select>
+
+      <label for="message">Message:</label>
+      <textarea id="message" placeholder="Type your message..."></textarea>
+
+      <div class="ai-buttons">
+        <button type="button" id="ai-generate">✨ AI Message</button>
+        <button type="button" id="ai-tribute">🕊️ Tribute Message</button>
+      </div>
+
+      <label for="photo">Upload a Photo (Optional):</label>
+      <input type="file" id="photo" accept="image/*" />
+
+      <label for="format">Card Format:</label>
+      <select id="format">
+        <option>Digital Image</option>
+        <option>Printable PDF</option>
+        <option>Animated GIF</option>
+      </select>
+
+      <button type="submit">💾 Save Card</button>
+    </form>
+
+    <div id="preview-section">
+      <h3>🖼️ Live Preview:</h3>
+      <div id="preview-output">[ Your card message will appear here ]</div>
     </div>
   </section>
 
@@ -69,6 +94,15 @@
   <footer class="footer">
     <p>&copy; 2025 CardCrafter | <a href="#">Contact</a> | <a href="#">Privacy</a></p>
   </footer>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+  <!-- Your Firebase + Upload + AI + Firestore logic -->
+  <script src="app.js"></script>
 
 </body>
 </html>
